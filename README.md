@@ -113,7 +113,7 @@ flowchart TD
     end
 
     subgraph Storage["Persistent Storage"]
-        SQLite[("SQLite Database (agrismart.db)")]
+        SQLite[("SQLite Database - agrismart.db")]
         UsersTable["users Table"]
         SessionsTable["sessions Table"]
         ScansTable["scans Table"]
@@ -126,18 +126,18 @@ flowchart TD
     ProfileUI -->|Update Profile| Router
 
     Router --> AuthMiddleware
-    AuthMiddleware <--> SessionsTable
-    AuthMiddleware <--> UsersTable
+    AuthMiddleware --> SessionsTable
+    AuthMiddleware --> UsersTable
 
     ScanService -->|Image Bytes| Predictor
-    Predictor -->|Tensor (224x224)| EfficientNet
+    Predictor -->|224x224 Tensor| EfficientNet
     EfficientNet -->|Top-K Softmax Probs| Predictor
     Predictor -->|Prediction Result| ScanService
     ScanService -->|Record Scan| ScansTable
 
     AssistantService -->|Prompt + Farm Context| ExternalLLM
-    Router <--> UsersTable
-    Router <--> ScansTable
+    Router --> UsersTable
+    Router --> ScansTable
     Router --> StaticServer
 ```
 
@@ -153,7 +153,7 @@ The core disease detection model uses the **EfficientNet-B0** convolutional neur
 - **Framework**: PyTorch (`torch`, `torchvision`, `Pillow`)
 - **Number of Classes**: 38 plant and disease classes
 - **Input Resolution**: 224 × 224 pixels (images are resized to 256px and center-cropped to 224px)
-- **Normalization**: ImageNet standards ($\mu = [0.485, 0.456, 0.406]$, $\sigma = [0.229, 0.224, 0.225]$)
+- **Normalization**: ImageNet standards (mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])
 - **Device Support**: Automatic CUDA GPU acceleration with fallback to CPU (`map_location="cpu"`)
 - **Concurrency**: Thread-safe lazy singleton loading with Python threading locks.
 
